@@ -1,15 +1,21 @@
-import { chromium, FullConfig } from "@playwright/test";
+import { chromium, type FullConfig } from "@playwright/test";
 import { loginToSylius } from "./shared/login";
 import { contextOptions } from "./config/context";
+import { getBaseURL, requiredEnv } from "./config/env";
 
-async function globalSetup(config: FullConfig) {
+export default async function globalSetup(config: FullConfig) {
+  getBaseURL();
+  requiredEnv("USER_NAME");
+  requiredEnv("PASSWORD");
   const browser = await chromium.launch();
-  const context = await browser.newContext(contextOptions);
-  const page = await context.newPage();
-
-  await loginToSylius(page);
-  await context.storageState({ path: "auth.json" });
-  await browser.close();
+  try {
+    const context = await browser.newContext(contextOptions);
+    const page = await context.newPage();
+    await loginToSylius(page);
+    const storageState = config.projects[0].use.storageState;
+    if (typeof storageState !== "string") throw new Error("Brak ścieżki storageState.");
+    await context.storageState({ path: storageState });
+  } finally {
+    await browser.close();
+  }
 }
-
-export default globalSetup;

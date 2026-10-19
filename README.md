@@ -1,88 +1,54 @@
-# KsiegarniaCMS
-## Wymagania
-WERSJA NODE - v22.13.0
+# Księgarnia CMS
 
-## Struktura projektu
-Projekt jest podzielony na kilka kluczowych katalogów i plików, z których każdy pełni określoną rolę:
+Automatyczne testy panelu administracyjnego Sylius i lokalny panel QA, połączony z Centrum testów. Projekt zawiera 75 scenariuszy interfejsu, wykonywanych w Chromium, Firefox lub WebKit. Większość sprawdza widoczność formularzy, filtrów i kolumn; ich zaliczenie nie potwierdza wszystkich procesów biznesowych.
 
-- **`pages/`**: Zawiera klasy page object, które definiują strukturę i logikę nawigacji dla każdej strony w aplikacji.
-  - **`base/BasePage.ts`**: Klasa bazowa dla wszystkich obiektów strony, dostarczająca wspólne metody (np. `open`, `checkElementsPresence`) oraz właściwości.
-  - Podkatalogi (np. `announcements`, `callouts`, `productOptions`, `paymentMethods`): Zawierają klasy specyficzne dla danej strony (np. `AnnouncementsPage.ts`, `NewCalloutsPage.ts`).
+## Przygotowanie
 
-- **`assertions/`**: Zawiera klasy asercji, które odpowiadają za logikę weryfikacji, oddzieloną od obiektów strony dla lepszej modularności.
-  - Podkatalogi odzwierciedlają strukturę `pages/` (np. `announcements`, `callouts`, `productOptions`) i zawierają pliki asercji (np. `AnnouncementsAssertions.ts`, `NewCalloutsAssertions.ts`).
+Wymagane Node.js 22.13 lub nowszy oraz dostęp do testowanego środowiska (w razie potrzeby VPN).
 
-- **`locators/`**: Przechowuje definicje lokatorów dla wszystkich stron, zorganizowane według funkcji lub typu strony.
-  - Podkatalogi (np. `announcements`, `callouts`, `productOptions`, `paymentMethods`): Zawierają pliki lokatorów (np. `announcementsLocators.ts`, `newCalloutsLocators.ts`).
-  - **`commonLocators.ts`**: Definiuje wspólne lokatory (np. przyciski takie jak `createButton`, `cancelButton`) używane na wielu stronach.
+```powershell
+npm ci
+npx playwright install
+Copy-Item .env.example .env
+```
 
-- **`tests/`**: Zawiera pliki testowe napisane przy użyciu runnera testów Playwright.
-  - Przykładowe pliki: `announcements.spec.ts`, `newCallouts.spec.ts`, itp., znajdujące się w głównym katalogu `tests` lub w podkatalogu, jeśli jest to potrzebne.
+Uzupełnij `.env`: `BASE_URL` (adres panelu, np. `https://example.com/admin/`), `USER_NAME`, `PASSWORD` oraz opcjonalnie `X_TEST_TOKEN`. Plik `.env`, sesja `auth.json`, raporty, logi i lokalna historia są ignorowane przez Git. Nie dodawaj ich do repozytorium. Uruchom ponownie panel po zmianie konfiguracji.
 
-- **`shared/utils.ts`**: (Jeśli dotyczy) Zawiera funkcje pomocnicze (np. `checkElementPresence`, `goto`) używane przez framework. Zazwyczaj są one dziedziczone przez `BasePage`.
+## Panel testów
 
-## Zależności
-- **Playwright**: Główna biblioteka testowa, odpowiedzialna za automatyzację przeglądarki.
-- **TypeScript**: Używany dla bezpieczeństwa typów i nowoczesnych funkcji JavaScript.
-- **BasePage**: Wszystkie klasy strony i asercji zależą od `BasePage` dla wspólnej funkcjonalności.
-- **Locators**: Klasy strony zależą od swoich odpowiednich plików lokatorów (np. `AnnouncementsPage` zależy od `announcementsLocators`).
-- **Klasy asercji**: Zależą od swoich odpowiadających klas strony oraz `BasePage` dla logiki weryfikacji.
-- **CommonLocators**: Używane przez wiele klas strony i asercji dla wspólnych elementów interfejsu (np. przycisków).
+Uruchom **KsiegarniaCMS.cmd** albo `npm start` i otwórz http://127.0.0.1:4181.
 
-## Jak uruchamiać testy
-1. **Wymagania wstępne**:
-   - Upewnij się, że Node.js i npm są zainstalowane.
-   - Zainstaluj zależności projektu, uruchamiając:
-     ```bash
-     npm install
-     ```
-   - Zainstaluj przeglądarki Playwright:
-     ```bash
-     npx playwright install
-     ```
+Panel ma wspólny układ z Centrum testów: przegląd, wyszukiwarkę scenariuszy, wybór przeglądarki, tryb z widocznym oknem, postęp, logi, historię i raporty Playwright. Zaznacz scenariusze i wybierz „Uruchom wybrane”. Otwarcie panelu nie uruchamia testów. Panel wykonuje jeden przebieg jednocześnie, z jednym pracownikiem Playwright. Lokalne blokady chronią również przed drugim panelem; bezpośrednie uruchomienia CLI pozostają osobną ścieżką.
 
-2. **Uruchamianie testów**:
-   - Aby uruchomić wszystkie testy w trybie widocznym (z widoczną przeglądarką):
-     ```bash
-     npx playwright test --headed
-     ```
-   - Aby uruchomić konkretny plik testowy (np. `announcements.spec.ts`):
-     ```bash
-     npx playwright test ./tests/announcements.spec.ts --headed
-     ```
-   - Aby uruchomić testy w trybie bezgłowym:
-     ```bash
-     npx playwright test
-     ```
-   - Dodaj dodatkowe opcje w razie potrzeby (np. `--grep` do filtrowania testów po tytule, `--reporter` dla niestandardowego raportowania).
+Historia znajduje się w `.cms/history.json`, raporty w `.cms/reports/<id>`, a artefakty w `.cms/artifacts/<id>`. Nie usuwaj ich, jeśli korzystasz z przypiętych raportów w Centrum. Przed kopią zapasową zakończ uruchomienia i zamknij panel; zachowaj `.cms` osobno, poza GitHubem. Raporty mogą zawierać dane środowiska, dlatego są dostępne tylko lokalnie.
 
-3. **Konfiguracja**:
-   - Konfiguracja testów jest zazwyczaj zarządzana w pliku `playwright.config.ts`. Upewnij się, że jest poprawnie skonfigurowany z odpowiednim bazowym URL-em, ustawieniami projektu i raportami, jeśli są dostosowane.
+## Centrum testów
 
-## Gdzie szukać
-- **Logika strony**: Sprawdź katalog `pages/` dla klas specyficznych dla strony (np. `pages/announcements/AnnouncementsPage.ts`).
-- **Asercje**: Szukaj w katalogu `assertions/` dla logiki weryfikacji (np. `assertions/announcements/AnnouncementsAssertions.ts`).
-- **Lokatory**: Znajdź definicje lokatorów w katalogu `locators/` (np. `locators/announcements/announcementsLocators.ts` dla lokatorów specyficznych dla strony lub `locators/commonLocators.ts` dla wspólnych elementów).
-- **Testy**: Przejrzyj pliki testowe w katalogu `tests/` (np. `tests/announcements.spec.ts`).
-- **Funkcje pomocnicze**: Jeśli używane, funkcje pomocnicze znajdują się w `shared/utils.ts`.
-- **Podstawowa funkcjonalność**: Fundament projektu znajduje się w `pages/base/BasePage.ts`.
+W sąsiednim folderze `../Centrum-testow` dodano integrację CMS: katalog scenariuszy, historię uruchomień, panel wbudowany oraz scenariusze i dowody raportów w zgłoszeniach Redmine. Launcher Centrum uruchamia cztery panele, w tym CMS na porcie 4181. Dla innej lokalizacji ustaw `cmsPath` w `projects.local.json` Centrum lub zmienną `TEST_CENTER_CMS`. Kod integracji Centrum pozostaje w jego własnym repozytorium.
 
-## Najlepsze praktyki
-- **Modularność**: Unikaj dodawania logiki weryfikacyjnej bezpośrednio w klasach strony; zamiast tego używaj klas asercji.
-- **Utrzymanie lokatorów**: Aktualizuj lokatory w ich odpowiednich plikach i ponownie używaj wspólnych lokatorów, gdzie to możliwe.
-- **Organizacja testów**: Nazywaj pliki testowe tak, aby odzwierciedlały testowaną stronę lub funkcję (np. `newCallouts.spec.ts`).
-- **Obsługa błędów**: Upewnij się, że `BasePage` zawiera solidną obsługę błędów dla metod takich jak `checkElementsPresence`.
+## Polecenia
 
-## Wkład w projekt
-- Aby dodać nową stronę:
-  1. Utwórz nowy plik w `pages/` (np. `pages/newFeature/NewFeaturePage.ts`).
-  2. Zdefiniuj lokatory w `locators/newFeature/newFeatureLocators.ts`.
-  3. Utwórz klasę asercji w `assertions/newFeature/NewFeatureAssertions.ts`.
-  4. Napisz testy w `tests/newFeature.spec.ts`.
-- Aktualizuj `BasePage` lub `commonLocators`, jeśli potrzebne są nowe wspólne funkcjonalności lub elementy.
-- Uruchom testy po zmianach, aby upewnić się, że wszystko działa poprawnie.
+| Polecenie | Działanie |
+|---|---|
+| `npm start` | Lokalny panel CMS |
+| `npm test` | Testy CMS we wszystkich trzech przeglądarkach |
+| `npm run test:chromium` | Testy CMS tylko w Chromium |
+| `npm run test:ui` | Wbudowany interfejs Playwright |
+| `npm run test:headed` | Testy z widoczną przeglądarką |
+| `npm run test:list` | Wczytanie i lista testów bez logowania do CMS |
+| `npm run report` | Raport z ostatniego uruchomienia CLI |
+| `npm run typecheck` | Kontrola TypeScript |
+| `npm run test:unit` | Testy panelu na lokalnych danych próbnych |
+| `node dashboard/ui-check.mjs` | Sprawdzenie UI w lokalnym Edge, bez testów CMS |
 
-## Rozwiązywanie problemów
-- **Niepowodzenia testów**: Sprawdź definicje lokatorów lub zmiany w interfejsie aplikacji.
-- **Problemy ze ścieżkami**: Zweryfikuj, czy ścieżki importów zgadzają się ze strukturą Twojego projektu.
-- **Problemy z przeglądarką**: Upewnij się, że przeglądarki Playwright są zainstalowane i kompatybilne z Twoją wersją Node.js.
+Raporty uruchomień z panelu otwieraj z jego historii. Testy panelu wykorzystują izolowany proces próbny i nie łączą się z CMS; potwierdzenie działania scenariuszy biznesowych wymaga osobnego wykonania na dostępnym środowisku.
+
+## Struktura
+
+- `tests/` — scenariusze Playwright.
+- `pages/` i `locators/` — operacje na stronach i selektory Syliusa.
+- `assertions/` — asercje z nazwanymi krokami w raporcie.
+- `config/` i `shared/` — walidacja środowiska, logowanie i wspólne funkcje.
+- `dashboard/` — lokalny serwer panelu, UI i testy jego API.
+
+Logowanie sprawdza opuszczenie formularza przed zapisaniem sesji i zawsze zamyka przeglądarkę przygotowawczą. Nieudane testy zachowują ślady i zrzuty ekranu. Poprzednia historia GitLaba została zachowana lokalnie w ignorowanym folderze `.git-gitlab-backup`; nie jest częścią historii GitHuba.

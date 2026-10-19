@@ -1,6 +1,6 @@
 import { test } from "@playwright/test";
 import { NewCountriesPage } from "../pages/countries/NewCountriesPage";
-import { NewCountriesAssertions } from "../assertions/countries/NewCountriesAssertions.ts";
+import { NewCountriesAssertions } from "../assertions/countries/NewCountriesAssertions";
 
 test("Nowy kraj", async ({ page }) => {
   const newCountriesPage = new NewCountriesPage(page);

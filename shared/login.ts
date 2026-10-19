@@ -1,19 +1,14 @@
-import { Page } from "@playwright/test";
-import dotenv from 'dotenv';
+import { expect, type Page } from "@playwright/test";
+import { getBaseURL, requiredEnv } from "../config/env";
 
-dotenv.config();
-
-// Funkcja do logowania do syliusa
 export async function loginToSylius(page: Page) {
-
-  // Nawigacja na stronę logowania
-  await page.goto(process.env.BASE_URL!);
-
-  // Wypełnij formularz logowania
-  await page.getByLabel("Nazwa użytkownika").fill(process.env.USER_NAME!);
-  await page.getByLabel("Hasło").fill(process.env.PASSWORD!);
-
-  // Kliknij przycisk logowania
-  await page.getByRole("button", { name: "Login" }).click();
+  const username = requiredEnv("USER_NAME");
+  const password = requiredEnv("PASSWORD");
+  await page.goto(getBaseURL());
+  await page.getByLabel("Nazwa użytkownika").fill(username);
+  await page.getByLabel("Hasło").fill(password);
+  const loginButton = page.getByRole("button", { name: "Login", exact: true });
+  await loginButton.click();
+  await expect(loginButton, "Logowanie nie powiodło się: formularz nadal jest widoczny.")
+    .toBeHidden();
 }
-

@@ -1,9 +1,8 @@
-import dotenv from "dotenv";
+import type { BrowserContextOptions } from "@playwright/test";
+import "./env";
 
-dotenv.config();
-
-export const contextOptions = {
-  extraHTTPHeaders: {
-    "X-Tests-Token": process.env.X_TEST_TOKEN!,
-  },
+export const contextOptions: BrowserContextOptions = {
+  extraHTTPHeaders: process.env.X_TEST_TOKEN
+    ? { "X-Tests-Token": process.env.X_TEST_TOKEN }
+    : {},
 };

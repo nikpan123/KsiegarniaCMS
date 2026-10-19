@@ -1,0 +1,27 @@
+export const newCatalogPromotionLocators = {
+  form: {
+    code: "#sylius_catalog_promotion_code",
+    name: "#sylius_catalog_promotion_name",
+    dateFrom: "#sylius_catalog_promotion_startDate_date",
+    timeFrom: "#sylius_catalog_promotion_startDate_time",
+    dateTo: "#sylius_catalog_promotion_endDate_date",
+    timeTo: "#sylius_catalog_promotion_endDate_time",
+    enabled: "#sylius_catalog_promotion_enabled",
+    priority: "#sylius_catalog_promotion_priority",
+    exclusive: "#sylius_catalog_promotion_exclusive",
+    applyOnlyHighest: "#sylius_catalog_promotion_applyOnlyHighest",
+    applyOnCart: "#sylius_catalog_promotion_applyOnCart",
+    infoPromotionGroup: "#sylius_catalog_promotion_infoPromotionGroup",
+    retail: "#sylius_catalog_promotion_channels_0",
+    empik: "#sylius_catalog_promotion_channels_1",
+    academy: "#sylius_catalog_promotion_channels_2",
+    wholesale: "#sylius_catalog_promotion_channels_3",
+    label: "#sylius_catalog_promotion_translations_pl_PL_label",
+    description: "#sylius_catalog_promotion_translations_pl_PL_description",
+  },
+  specificButtons: {
+    addRuleInfoBoxScopes: '#infoBoxScopes a.ui.labeled.icon.button[data-form-collection="add"]',
+    addRuleConfigurationBoxScopes: '#sylius_catalog_promotion_actions a.ui.labeled.icon.button[data-form-collection="add"]',
+    addActionConfigurationBoxScopes: '#sylius_catalog_promotion_scopes a.ui.labeled.icon.button[data-form-collection="add"]',
+  },
+};

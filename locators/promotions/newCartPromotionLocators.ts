@@ -1,0 +1,23 @@
+export const newCartPromotionLocators = {
+  formFields: {
+    code: "#sylius_promotion_code",
+    name: "#sylius_promotion_name",
+    personOrdering: "#sylius_promotion_personOrdering",
+    shortDescription: "#sylius_promotion_shortDescription",
+    description: "#sylius_promotion_description",
+    usageLimit: "#sylius_promotion_usageLimit",
+    priority: "#sylius_promotion_priority",
+    couponBased: "#sylius_promotion_couponBased",
+    exclusive: "#sylius_promotion_exclusive",
+    appliesToDiscounted: "#sylius_promotion_appliesToDiscounted",
+    applyOnlyHighestAction: "#sylius_promotion_applyOnlyHighestAction",
+    retail: "#sylius_promotion_channels_0",
+    empik: "#sylius_promotion_channels_1",
+    academy: "#sylius_promotion_channels_2",
+    wholesale: "#sylius_promotion_channels_3",
+    dateFrom: "#sylius_promotion_startsAt_date",
+    timeFrom: "#sylius_promotion_startsAt_time",
+    dateTo: "#sylius_promotion_endsAt_date",
+    timeTo: "#sylius_promotion_endsAt_time",
+  },
+};

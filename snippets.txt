@@ -1,0 +1,185 @@
+{
+	"Check Filters Visibility": {
+		"prefix": "checkFilters",
+		"body": [
+			"public async checkFiltersVisibility() {",
+			"    await this.filterButton().click();",
+			"    await checkElementPresence(this.page, ${1:locatorsObject}.filters.${2:filterName}, \"Filtr ${3:Element Description}\");",
+			"}"
+		],
+		"description": "Generates a method to check visibility of filters after clicking a filter button"
+	},
+	"Check Table Visibility": {
+		"prefix": "checkTable",
+		"body": [
+			"public async check${1:tableName}TableVisibility() {",
+			"    await checkElementPresence(this.page, ${2:locatorsObject}.columns.${3:filterName}, \"Kolumna ${4:Element Description}\");",
+			"}"
+		],
+		"description": "Generates a method to check visibility of column in table"
+	},
+	"Check Buttons Visibility": {
+		"prefix": "checkButtons",
+		"body": [
+			"public async checkButtonPresence() {",
+			"    await checkElementPresence(this.page, commonLocators.buttons.${2:filterName}, \"Przycisk ${3:Element Description}\");",
+			"}"
+		],
+		"description": "Generates a method to check visibility of buttons"
+	},
+	"Check Form Visibility": {
+		"prefix": "checkForm",
+		"body": [
+			"public async checkFormVisibility() {",
+			"    await checkElementPresence(this.page, ${1:locatorsObject}.columns.${2:filterName}, \"Pole ${3:Element Description}\");",
+			"}"
+		],
+		"description": "Generates a method to check visibility of fields in form"
+	},
+	"Generate Locators Object": {
+		"prefix": "genLocators",
+		"body": [
+			"import { commonLocators } from '../../locators/commonLocators';",
+			"",
+			"export const ${1:locatorsName}Locators = {",
+			"  filters: {",
+			"    ${2:key1}: \"${3:#selector1}\",",
+			"    ${4:key2}: \"${5:#selector2}\",",
+			"    ${6:// Add more key-value pairs as needed}",
+			"  },",
+			"  form: {",
+			"    ${7:key1}: \"${8:#selector1}\",",
+			"    ${9:key2}: \"${10:#selector2}\",",
+			"    ${11:// Add more key-value pairs as needed}",
+			"  },",
+			"  columns: {",
+			"    ${12:key1}: \"${13:.selector1}\",",
+			"    ${14:key2}: \"${15:.selector2}\",",
+			"    ${16:// Add more key-value pairs as needed}",
+			"  },",
+			"  buttons: commonLocators.buttons, // Wykorzystanie wspólnych lokatorów",
+			"};"
+		],
+		"description": "Generates a locators object with customizable sections and key-value pairs"
+	},
+	"Create POM Page": {
+		"prefix": "createPOMPage",
+		"body": [
+			"import { Page } from \"@playwright/test\";",
+			"import * as dotenv from \"dotenv\";",
+			"import { ${1:locatorsFile} } from \"../locators/${1:locatorsFile}\";",
+			"import { commonLocators } from \"../../locators/commonLocators\";",
+			"import { checkElementPresence, goto } from \"../../shared/utils\";",
+			"",
+			"dotenv.config();",
+			"",
+			"export class ${2:PageName} {",
+			"  page: Page;",
+			"",
+			"  constructor(page: Page) {",
+			"    this.page = page;
+  }
+    goto(this.page, "admin/announcements");",
+			"  }",
+			"",
+			"  // Lokatory filtrów",
+			"  filterExample = () => this.page.locator(${1:locatorsFile}.filters.example);",
+			"",
+			"  // Lokatory kolumn",
+			"  columnExample = () => this.page.locator(${1:locatorsFile}.columns.example);",
+			"",
+			"  // Lokatory formularzy",
+			"  formExample = () => this.page.locator(${1:locatorsFile}.form.example);",
+			"",
+			"  // Lokatory przycisków",
+			"  buttonExample = () => this.page.locator(commonLocators.buttons.example);",
+			"",
+			"  // Metody
+  public async open() {
+    await goto(this.page, "admin/announcements");
+  }",
+			"  public async open() {",
+			"    await this.page.goto(\"${3:URL}\");",
+			"  }",
+			"",
+			"  public async checkFiltersVisibility() {",
+			"    await this.filterButton().click();",
+			"  }",
+			"",
+			"  public async checkTableVisibility() {}",
+			"",
+			"  public async checkFormVisibility() {}",
+			"",
+			"  public async checkButtonPresence() {}",
+			"}",
+		],
+		"description": "Generates a new Page Object Model (POM) class for Playwright"
+	},
+	"Custom Test": {
+		"prefix": "customTest",
+		"body": [
+			"import { test } from \"@playwright/test\";",
+			"import { loginToSylius } from \"../shared/login\";",
+			"import { ${1:PageClass} } from \"../pages/${1:PageClass}\";",
+			"",
+			"test(\"${2:TestName}\", async ({ page }) => {",
+			"  // Logowanie",
+			"",
+			"  await loginToSylius(page);",
+			"",
+			"  // Utworzenie instancji klasy",
+			"  const ${3:PageInstance} = new ${1:PageClass}(page);",
+			"",
+			"  await ${3:PageInstance}.open();",
+			"",
+			"  // Filtry",
+			"  await ${3:PageInstance}.checkFiltersVisibility();",
+			"",
+			"  // Kolumny",
+			"  await ${3:PageInstance}.checkTableVisibility();",
+			"",
+			"  // Formularz",
+			"  await ${3:PageInstance}.checkFormVisibility();",
+			"",
+			"  // Przyciski",
+			"  await ${3:PageInstance}.checkButtonPresence();",
+			"});"
+		],
+		"description": "Generates a Playwright test for customer groups with login and UI checks"
+	},
+	"Locator": {
+		"prefix": "createLocator",
+		"body": [
+			"${1:LocatorName} = () => this.page.locator(${2:locatorsFile}.${3:locatorType}.${1:LocatorName});"
+		],
+		"description": "Generates a locator"
+	},
+	"Check Element Presence": {
+		"prefix": "checkElement",
+		"body": [
+			"await checkElementPresence(this.page, ${1:locatorsObject}.${2:locatorType}.${3:name}, \"Filtr ${4:Element Description}\");"
+		],
+		"description": "Generates a line to check the presence of an element in Playwright."
+	},
+	"Check Column Presence": {
+		"prefix": "checkColumn",
+		"body": [
+			"await checkElementPresence(this.page, ${1:locatorsObject}.${2:locatorType}.${3:name}, \"Kolumna ${4:Element Description}\");"
+		],
+		"description": "Generates a line to check the presence of a column in Playwright."
+	},
+	"Check Form Element Presence": {
+		"prefix": "checkForm",
+		"body": [
+			"await checkElementPresence(this.page, ${1:locatorsObject}.${2:locatorType}.${3:name}, \"Pole ${4:Element Description}\");"
+		],
+		"description": "Generates a line to check the presence of a form element in Playwright."
+	},
+	"Check Button Presence": {
+		"prefix": "checkButton",
+		"body": [
+			"await checkElementPresence(this.page, commonLocators.buttons.${1:name}, \"Przycisk ${2:Button Description}\");"
+		],
+		"description": "Generates a line to check the presence of an element in Playwright."
+	}
+}

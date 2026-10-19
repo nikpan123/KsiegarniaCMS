@@ -1,0 +1,36 @@
+import { commonLocators } from "../commonLocators";
+
+export const coursePackageLocators = {
+  filters: {
+    closedCourseMeetingNumber: "#criteria_closedCourseMeetingNumber_value",
+    closedCourseOrder: "#criteria_closedCourseOrder_value",
+    createdAtFromDate: "#criteria_createdAt_from_date",
+    createdAtFromTime: "#criteria_createdAt_from_time",
+    createdAtToDate: "#criteria_createdAt_to_date",
+    createdAtToTime: "#criteria_createdAt_to_time",
+    realizationDateFromDate: "#criteria_realizationDate_from_date",
+    realizationDateFromTime: "#criteria_realizationDate_from_time",
+    realizationDateToDate: "#criteria_realizationDate_to_date",
+    realizationDateToTime: "#criteria_realizationDate_to_time",
+    hasRealisationDate: "#criteria_hasRealisationDate_course_package_has_realisation_date",
+    courseTopic: "#criteria_closedCourse_course_package_closed_course",
+    promoter: 'div.sylius-autocomplete.ui.fluid.search.selection.dropdown[data-url="/academy/ajax/search-assigned-promoter-by-name"]',
+    consultant: 'div.sylius-autocomplete.ui.fluid.search.selection.dropdown[data-url="/academy/ajax/search-consultants"]',
+    placeName: "#criteria_placeName_type",
+  },
+  columns: {
+    checkbox: commonLocators.columns.checkbox,
+    assignedPromoter: ".sylius-table-column-assignedPromoter",
+    createdAt: commonLocators.columns.createdAt,
+    courseIds: ".sylius-table-column-courseIds",
+    realizationDates: ".sylius-table-column-realizationDates",
+    subject: commonLocators.columns.subjectColumn,
+    leadingConsultants: ".sylius-table-column-leadingConsultants",
+    placeNames: ".sylius-table-column-placeNames",
+    order: ".sylius-table-column-order",
+    payer: ".sylius-table-column-payer",
+    total: commonLocators.columns.total,
+    state: commonLocators.columns.state,
+    actions: commonLocators.columns.actions,
+  },
+};

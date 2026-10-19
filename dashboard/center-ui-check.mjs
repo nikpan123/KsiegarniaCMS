@@ -15,5 +15,5 @@ try{
  await page.getByLabel('Szukaj testu').fill('newCustomers');assert.equal(await page.locator('[data-select]').count(),1);
  await page.getByRole('button',{name:'Nowy klient',exact:true}).click();await page.getByRole('dialog').waitFor();
  await page.getByRole('button',{name:'Zamknij',exact:true}).last().click();
- assert.deepEqual(errors,[]);console.log('Integracja UI OK: zgodne 75 scenariuszy, karta projektu, osadzony panel, filtrowanie i szczegóły testu w Centrum. Testy CMS nie zostały uruchomione.');
+ assert.deepEqual(errors,[]);console.log('Integracja UI OK: zgodne '+cms.catalog.length+' scenariuszy, karta projektu, osadzony panel, filtrowanie i szczegóły testu w Centrum. Testy CMS nie zostały uruchomione.');
 }finally{await browser.close();}

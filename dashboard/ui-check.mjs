@@ -13,6 +13,8 @@ try{
  await page.getByRole('link',{name:/Katalog testów/}).click();await page.getByRole('searchbox',{name:'Szukaj scenariusza'}).fill('newCustomers');
  assert.equal(await page.locator('[data-test]').count(),1);await page.locator('[data-test]').check();
  await page.getByLabel('Przeglądarka',{exact:true}).selectOption('firefox');
+ await page.getByLabel('Sprawdź także obrazy i zasoby',{exact:true}).check();
+ assert.equal(await page.getByLabel('Sprawdź także obrazy i zasoby',{exact:true}).isChecked(),true);
  await page.getByRole('link',{name:/Konfiguracja/}).click();await page.getByRole('heading',{name:'Dane logowania'}).waitFor();
  await page.getByRole('link',{name:/Historia uruchomień/}).click();await page.getByRole('heading',{name:'Historia uruchomień',exact:true}).waitFor();
  await page.setViewportSize({width:390,height:844});await page.getByRole('link',{name:/Katalog testów/}).click();

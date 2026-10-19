@@ -12,15 +12,18 @@
     "report": "playwright show-report",
     "typecheck": "tsc --noEmit",
     "start": "node dashboard/server.mjs",
-    "test:unit": "node --test dashboard/*.test.mjs"
+    "test:unit": "node --test dashboard/*.test.mjs",
+    "test:views": "node scripts/run-views.mjs",
+    "test:views:assets": "node scripts/run-views.mjs --assets",
+    "test:checks": "playwright test --config=playwright.checks.config.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@playwright/test": "^1.50.1",
+    "@playwright/test": "1.51.0",
     "@types/node": "^22.10.1",
-    "typescript": "^5.8.2"
+    "typescript": "5.8.2"
   },
   "dependencies": {
     "@types/dotenv": "^6.1.1",

@@ -1,6 +1,6 @@
 # Księgarnia CMS
 
-Automatyczne testy panelu administracyjnego Sylius i lokalny panel QA, połączony z Centrum testów. Projekt zawiera 75 scenariuszy interfejsu, wykonywanych w Chromium, Firefox lub WebKit. Większość sprawdza widoczność formularzy, filtrów i kolumn; ich zaliczenie nie potwierdza wszystkich procesów biznesowych.
+Automatyczne testy panelu administracyjnego Sylius i lokalny panel QA, połączony z Centrum testów. Projekt zawiera 75 wcześniejszych scenariuszy oraz 154 testy widoków po aktualizacji (153 typy widoków i kontrola 51 pozycji menu). Testy można wykonywać w Chromium, Firefox lub WebKit. Sprawdzają ładowanie stron oraz widoczność formularzy, filtrów, zakładek i kolumn. Ich zaliczenie nie potwierdza wszystkich procesów biznesowych. Szczegóły i ograniczenia opisuje [pokrycie widoków](docs/pokrycie-widokow.md).
 
 ## Przygotowanie
 
@@ -18,13 +18,19 @@ Uzupełnij `.env`: `BASE_URL` (adres panelu, np. `https://example.com/admin/`), 
 
 Uruchom **KsiegarniaCMS.cmd** albo `npm start` i otwórz http://127.0.0.1:4181.
 
-Panel ma wspólny układ z Centrum testów: przegląd, wyszukiwarkę scenariuszy, wybór przeglądarki, tryb z widocznym oknem, postęp, logi, historię i raporty Playwright. Zaznacz scenariusze i wybierz „Uruchom wybrane”. Otwarcie panelu nie uruchamia testów. Panel wykonuje jeden przebieg jednocześnie, z jednym pracownikiem Playwright. Lokalne blokady chronią również przed drugim panelem; bezpośrednie uruchomienia CLI pozostają osobną ścieżką.
+Panel ma wspólny układ z Centrum testów: przegląd, wyszukiwarkę scenariuszy, wybór przeglądarki, tryb z widocznym oknem, postęp, logi, historię i raporty Playwright. Zaznacz scenariusze i wybierz „Uruchom wybrane”. Otwarcie panelu nie uruchamia testów. Panel wykonuje jeden przebieg jednocześnie. Zestaw widoków korzysta z dwóch pracowników Playwright; pozostałe testy wykonują się kolejno. Lokalne blokady chronią również przed drugim panelem; bezpośrednie uruchomienia CLI pozostają osobną ścieżką.
 
 Historia znajduje się w `.cms/history.json`, raporty w `.cms/reports/<id>`, a artefakty w `.cms/artifacts/<id>`. Nie usuwaj ich, jeśli korzystasz z przypiętych raportów w Centrum. Przed kopią zapasową zakończ uruchomienia i zamknij panel; zachowaj `.cms` osobno, poza GitHubem. Raporty mogą zawierać dane środowiska, dlatego są dostępne tylko lokalnie.
 
 ## Centrum testów
 
 W sąsiednim folderze `../Centrum-testow` dodano integrację CMS: katalog scenariuszy, historię uruchomień, panel wbudowany oraz scenariusze i dowody raportów w zgłoszeniach Redmine. Launcher Centrum uruchamia cztery panele, w tym CMS na porcie 4181. Dla innej lokalizacji ustaw `cmsPath` w `projects.local.json` Centrum lub zmienną `TEST_CENTER_CMS`. Kod integracji Centrum pozostaje w jego własnym repozytorium.
+
+## Szybka kontrola po aktualizacji Syliusa
+
+W panelu wybierz **Testy po aktualizacji**. Opcja **Sprawdź także obrazy i zasoby** zaostrza kontrolę m.in. miniaturek. Zestaw nie zapisuje formularzy. HTTP 500 i brak starej kolumny, pola lub zakładki powodują błąd. Znane błędy obecnego CMS są opisane w [zestawieniu pokrycia](docs/pokrycie-widokow.md).
+
+`npm run test:views` uruchamia tę samą grupę w Chromium; `npm run test:views:assets` sprawdza również zasoby. Zachowaj wzorzec `config/view-baseline.json` sprzed aktualizacji i porównaj raporty obu wersji. Widoki rekordów wymagają danych testowych; bez rekordu są pomijane z uzasadnieniem.
 
 ## Polecenia
 
@@ -37,6 +43,9 @@ W sąsiednim folderze `../Centrum-testow` dodano integrację CMS: katalog scenar
 | `npm run test:headed` | Testy z widoczną przeglądarką |
 | `npm run test:list` | Wczytanie i lista testów bez logowania do CMS |
 | `npm run report` | Raport z ostatniego uruchomienia CLI |
+| `npm run test:views` | Kontrola widoków po aktualizacji w Chromium |
+| `npm run test:views:assets` | Kontrola widoków i zasobów, w tym obrazów |
+| `npm run test:checks` | Lokalne testy mechanizmu wykrywania braków UI |
 | `npm run typecheck` | Kontrola TypeScript |
 | `npm run test:unit` | Testy panelu na lokalnych danych próbnych |
 | `node dashboard/ui-check.mjs` | Sprawdzenie UI w lokalnym Edge, bez testów CMS |

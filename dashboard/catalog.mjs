@@ -11,9 +11,9 @@ export async function loadCatalog(root) {
       const match = matches[index];
       const code = file.replace('.spec.ts', '') + (matches.length > 1 ? ':' + (index + 1) : '');
       rows.push({id:'cms:' + code, code, title:match[1], project:'cms', type:'automatic',
-        module:file.startsWith('new') ? 'Formularze tworzenia' : 'Listy i zarządzanie',
+        module:file.startsWith('views-') ? 'Widoki po aktualizacji' : file.startsWith('new') ? 'Formularze tworzenia' : 'Listy i zarządzanie',
         file:'tests/' + file, line:source.slice(0,match.index).split('\n').length,
-        tags:['Sylius','Playwright'], source:'Scenariusz Playwright — Księgarnia CMS'});
+        tags:file.startsWith('views-') ? ['Sylius','Playwright','smoke','upgrade'] : ['Sylius','Playwright'], source:'Scenariusz Playwright — Księgarnia CMS'});
     }
   }
   return rows;

@@ -12,7 +12,7 @@ async function fixture(){
  await mkdir(path.join(root,'tests'));await mkdir(path.join(root,'node_modules/@playwright/test'),{recursive:true});
  await writeFile(path.join(root,'tests/products.spec.ts'),'test("Produkty <próba>", async () => {});');
  await writeFile(path.join(root,'.env'),'BASE_URL=http://example.invalid/admin/\nUSER_NAME=fixture\nPASSWORD=fixture-secret-123\n');
- const fake=`const fs=require('node:fs');const p=require('node:path');console.log('test log fixture-secret-123');console.log('CMS_EVENT:'+JSON.stringify({type:'begin',total:1}));setTimeout(()=>{fs.mkdirSync(process.env.PLAYWRIGHT_HTML_OUTPUT_DIR,{recursive:true});fs.writeFileSync(p.join(process.env.PLAYWRIGHT_HTML_OUTPUT_DIR,'index.html'),'Fixture report');console.log('CMS_EVENT:'+JSON.stringify({type:'test',title:'Produkty <próba>',file:'products.spec.ts',status:'passed',duration:10,retry:0}));console.log('CMS_EVENT:'+JSON.stringify({type:'end',status:'passed'}));},150);`;
+ const fake=`const fs=require('node:fs');const p=require('node:path');console.log('test log fixture-secret-123');console.log('ASSET_MODE:'+process.env.VIEW_STRICT_ASSETS);console.log('CMS_EVENT:'+JSON.stringify({type:'begin',total:1}));setTimeout(()=>{fs.mkdirSync(process.env.PLAYWRIGHT_HTML_OUTPUT_DIR,{recursive:true});fs.writeFileSync(p.join(process.env.PLAYWRIGHT_HTML_OUTPUT_DIR,'index.html'),'Fixture report');console.log('CMS_EVENT:'+JSON.stringify({type:'test',title:'Produkty <próba>',file:'products.spec.ts',status:'passed',duration:10,retry:0}));console.log('CMS_EVENT:'+JSON.stringify({type:'end',status:'passed'}));},150);`;
  await writeFile(path.join(root,'node_modules/@playwright/test/cli.js'),fake);
  return root;
 }
@@ -30,6 +30,7 @@ test('Katalog i API nie ujawniają konfiguracji; nieprawidłowe żądania nie ur
   assert.equal((await post(ctx,body,{Origin:'https://example.com'})).status,403);
   assert.equal((await post(ctx,body,{'X-CMS-Token':'wrong'})).status,403);
   assert.equal((await post(ctx,{...body,browser:'cmd.exe'})).status,400);
+  assert.equal((await post(ctx,{...body,strictAssets:'yes'})).status,400);
   assert.equal((await post(ctx,{...body,testIds:['../../other']})).status,400);
   const hostStatus=await new Promise((resolve,reject)=>{const req=request(ctx.origin+'/api/state',{headers:{Host:'example.com'}},res=>{res.resume();resolve(res.statusCode);});req.on('error',reject);req.end();});assert.equal(hostStatus,403);
   assert.equal(JSON.parse(await readFile(path.join(root,'.cms/history.json'),'utf8')).length,0);
@@ -39,13 +40,13 @@ test('Katalog i API nie ujawniają konfiguracji; nieprawidłowe żądania nie ur
 test('Uruchomienie zapisuje rzeczywiste zdarzenia, blokuje duplikaty, maskuje sekret i udostępnia trwały raport',async()=>{
  const root=await fixture();let ctx;
  try{
-  ctx=await start(root);const body={testIds:['cms:products'],browser:'chromium',headed:false};
+  ctx=await start(root);const body={testIds:['cms:products'],browser:'chromium',headed:false,strictAssets:true};
   const response=await post(ctx,body);assert.equal(response.status,202);const run=await response.json();
   assert.equal((await post(ctx,body)).status,409);
   let state;
   for(let attempt=0;attempt<100;attempt++){state=await(await fetch(ctx.origin+'/api/state')).json();if(!state.active)break;await new Promise(r=>setTimeout(r,30));}
   assert.equal(state.active,null);assert.equal(state.history[0].status,'PASSED');assert.equal(state.history[0].counts.passed,1);assert.equal(state.history[0].results.length,1);
-  assert.ok(!JSON.stringify(state).includes('fixture-secret-123'));assert.ok(state.history[0].logs.some(line=>line.includes('[ukryto]')));
+  assert.ok(!JSON.stringify(state).includes('fixture-secret-123'));assert.ok(state.history[0].logs.some(line=>line.includes('[ukryto]')));assert.ok(state.history[0].logs.includes('ASSET_MODE:1'));assert.equal(state.history[0].strictAssets,true);
   assert.equal(await(await fetch(ctx.origin+state.history[0].report)).text(),'Fixture report');
   assert.equal((await fetch(ctx.origin+'/report/'+run.id+'/%2e%2e%2fhistory.json')).status,404);
   await stop(ctx.server);ctx=await start(root);state=await(await fetch(ctx.origin+'/api/state')).json();assert.equal(state.history[0].id,run.id);assert.equal(state.history[0].status,'PASSED');

@@ -41,6 +41,7 @@ export async function createDashboard({projectRoot=root, dataDir=path.join(proje
     if(!browsers.includes(body.browser))throw fail('Wybierz obsługiwaną przeglądarkę.');
     if(!Array.isArray(body.testIds)||!body.testIds.length||body.testIds.length>catalog.length||body.testIds.some(id=>!catalog.some(t=>t.id===id)))throw fail('Wybierz scenariusze z katalogu.');
     if(typeof body.headed!=='boolean')throw fail('Niepoprawny tryb przeglądarki.');
+    if(body.strictAssets!==undefined&&typeof body.strictAssets!=='boolean')throw fail('Niepoprawny tryb kontroli zasobów.');
     const missing=['BASE_URL','USER_NAME','PASSWORD'].filter(key=>!environment[key]?.trim());
     if(missing.length)throw fail('Uzupełnij lokalny plik .env: '+missing.join(', '));
     try{const url=new URL(environment.BASE_URL);if(!['https:','http:'].includes(url.protocol)||url.username||url.password)throw new Error();}catch{throw fail('BASE_URL musi być adresem HTTP lub HTTPS bez danych logowania.');}
@@ -52,13 +53,13 @@ export async function createDashboard({projectRoot=root, dataDir=path.join(proje
     try{
       const id=randomUUID(),reportDir=path.join(dataDir,'reports',id);
       active={id,title:chosen.length===catalog.length?'Pełny zestaw CMS':chosen.length===1?chosen[0].title:`Wybrane scenariusze (${chosen.length})`,
-        project:'cms',startedAt:new Date().toISOString(),status:'RUNNING',browser:body.browser,headed:body.headed,
+        project:'cms',startedAt:new Date().toISOString(),status:'RUNNING',browser:body.browser,headed:body.headed,strictAssets:!!body.strictAssets,
         environment:new URL(environment.BASE_URL).host,testIds:chosen.map(t=>t.id),total:chosen.length,results:[],logs:[],counts:{passed:0,failed:0,skipped:0}};
       const run=active;history.unshift(run);await persist();
-      const args=[path.join(projectRoot,'node_modules/@playwright/test/cli.js'),'test',...files,'--project='+body.browser,'--workers=1',
+      const args=[path.join(projectRoot,'node_modules/@playwright/test/cli.js'),'test',...files,'--project='+body.browser,'--workers='+(chosen.every(t=>t.tags.includes('upgrade'))?'2':'1'),
         '--output='+path.join(dataDir,'artifacts',id),'--reporter=list,html,json,./dashboard/reporter.cjs'];
       if(body.headed)args.push('--headed');
-      child=spawn(process.execPath,args,{cwd:projectRoot,windowsHide:true,env:{...environment,FORCE_COLOR:'0',PLAYWRIGHT_HTML_OPEN:'never',
+      child=spawn(process.execPath,args,{cwd:projectRoot,windowsHide:true,env:{...environment,VIEW_STRICT_ASSETS:body.strictAssets?'1':'0',FORCE_COLOR:'0',PLAYWRIGHT_HTML_OPEN:'never',
         PLAYWRIGHT_HTML_OUTPUT_DIR:reportDir,PLAYWRIGHT_JSON_OUTPUT_FILE:path.join(reportDir,'results.json')},stdio:['ignore','pipe','pipe']});
       let pending='',finished=false;
       const log=line=>{if(line.trim())run.logs.push(sanitize(line).slice(0,4000));if(run.logs.length>1200)run.logs.shift();};
@@ -67,7 +68,7 @@ export async function createDashboard({projectRoot=root, dataDir=path.join(proje
           try{const event=JSON.parse(line.slice(10));if(event.type==='begin')run.total=event.total;
             if(event.type==='end')run.runnerStatus=event.status;
             if(event.type==='test'){
-              const result={...event};delete result.type;result.title=sanitize(result.title);
+              const result={...event};delete result.type;result.title=sanitize(result.title);result.warnings=Array.isArray(result.warnings)?result.warnings.map(w=>({type:w.type,description:sanitize(w.description)})):[];
               const old=run.results.findIndex(r=>r.file===result.file&&r.title===result.title);
               if(old>=0)run.results.splice(old,1,result);else run.results.push(result);
               run.counts={passed:run.results.filter(r=>r.status==='passed').length,failed:run.results.filter(r=>['failed','timedOut','interrupted'].includes(r.status)).length,skipped:run.results.filter(r=>r.status==='skipped').length};

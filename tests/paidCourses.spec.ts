@@ -1,4 +1,4 @@
-import { test } from "@playwright/test";
+import { test } from "../shared/browser-preview";
 import { PaidCoursesPage } from "../pages/paidCourses/PaidCoursesPage";
 import { PaidCoursesAssertions } from "../assertions/paidCourses/PaidCoursesAssertions";
 

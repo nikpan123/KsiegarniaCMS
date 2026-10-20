@@ -1,4 +1,4 @@
-import { test } from "@playwright/test";
+import { test } from "../shared/browser-preview";
 import { NewShippingMethodsPage } from "../pages/shippingMethods/NewShippingMethodsPage";
 import { NewShippingMethodsAssertions } from "../assertions/shippingMethods/NewShippingMethodsAssertions";
 

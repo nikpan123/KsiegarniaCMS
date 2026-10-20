@@ -1,4 +1,4 @@
-import { test } from "@playwright/test";
+import { test } from "../shared/browser-preview";
 import { RedirectsPage } from "../pages/redirects/RedirectsPage";
 import { RedirectsAssertions } from "../assertions/redirects/RedirectsAssertions";
 

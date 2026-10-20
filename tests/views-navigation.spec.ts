@@ -1,4 +1,4 @@
-import {test} from '@playwright/test';
+import {test} from '../shared/browser-preview';
 import {checkNavigation} from '../shared/viewSmoke';
 
 test('Widoki: kompletność menu CMS', {tag:'@views'}, async ({page}) => {

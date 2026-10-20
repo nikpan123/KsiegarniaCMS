@@ -1,4 +1,4 @@
-import {expect, test, type Locator, type Page, type TestInfo} from '@playwright/test';
+import {expect, test, type Locator, type Page, type TestInfo} from './browser-preview';
 import {readFileSync} from 'node:fs';
 import path from 'node:path';
 import {getBaseURL} from '../config/env';

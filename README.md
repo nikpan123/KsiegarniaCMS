@@ -61,3 +61,7 @@ Raporty uruchomień z panelu otwieraj z jego historii. Testy panelu wykorzystuj�
 - `dashboard/` — lokalny serwer panelu, UI i testy jego API.
 
 Logowanie sprawdza opuszczenie formularza przed zapisaniem sesji i zawsze zamyka przeglądarkę przygotowawczą. Nieudane testy zachowują ślady i zrzuty ekranu. Poprzednia historia GitLaba została zachowana lokalnie w ignorowanym folderze `.git-gitlab-backup`; nie jest częścią historii GitHuba.
+
+### Nazwa testu i krok w przeglądarce
+
+Zaznacz w panelu **Pokaż okno przeglądarki**. W prawym górnym rogu strony pojawi się nazwa wykonywanego testu, aktualny etap i czynność. Nakładka działa także po nawigacji i w nowych kartach. Nie przechwytuje kliknięć ani nie pokazuje argumentów akcji, np. wpisywanych haseł. Podgląd bez okna przeglądarki pozostaje wyłączony. Kontrola nakładki na stronach próbnych: `npx playwright test --config playwright.preview.config.ts`.

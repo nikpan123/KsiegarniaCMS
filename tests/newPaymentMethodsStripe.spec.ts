@@ -1,4 +1,4 @@
-import { test } from "@playwright/test";
+import { test } from "../shared/browser-preview";
 import { NewPaymentMethodsStripePage } from "../pages/paymentMethods/NewPaymentMethodsStripePage";
 import { NewPaymentMethodsStripeAssertions } from "../assertions/paymentMethods/NewPaymentMethodsStripeAssertions";
 

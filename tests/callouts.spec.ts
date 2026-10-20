@@ -1,4 +1,4 @@
-import { test } from "@playwright/test";
+import { test } from "../shared/browser-preview";
 import { CalloutsPage } from "../pages/callouts/CalloutsPage";
 import { CalloutsAssertions } from "../assertions/callouts/CalloutsAssertions";
 

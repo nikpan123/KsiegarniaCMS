@@ -57,7 +57,7 @@ export async function createDashboard({projectRoot=root, dataDir=path.join(proje
         environment:new URL(environment.BASE_URL).host,testIds:chosen.map(t=>t.id),total:chosen.length,results:[],logs:[],counts:{passed:0,failed:0,skipped:0}};
       const run=active;history.unshift(run);await persist();
       const args=[path.join(projectRoot,'node_modules/@playwright/test/cli.js'),'test',...files,'--project='+body.browser,'--workers='+(chosen.every(t=>t.tags.includes('upgrade'))?'2':'1'),
-        '--output='+path.join(dataDir,'artifacts',id),'--reporter=list,html,json,./dashboard/reporter.cjs'];
+        '--output='+path.join(dataDir,'artifacts',id),'--reporter=list,html,json,./dashboard/reporter.cjs,./shared/browser-preview-reporter.cjs'];
       if(body.headed)args.push('--headed');
       child=spawn(process.execPath,args,{cwd:projectRoot,windowsHide:true,env:{...environment,VIEW_STRICT_ASSETS:body.strictAssets?'1':'0',FORCE_COLOR:'0',PLAYWRIGHT_HTML_OPEN:'never',
         PLAYWRIGHT_HTML_OUTPUT_DIR:reportDir,PLAYWRIGHT_JSON_OUTPUT_FILE:path.join(reportDir,'results.json')},stdio:['ignore','pipe','pipe']});

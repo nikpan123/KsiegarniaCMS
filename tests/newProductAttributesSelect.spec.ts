@@ -1,4 +1,4 @@
-import { test } from "@playwright/test";
+import { test } from "../shared/browser-preview";
 import { NewProductAttributesSelectPage } from "../pages/productAttributes/NewProductAttributesSelectPage";
 import { NewProductAttributesSelectAssertions } from "../assertions/productAttributes/NewProductAttributesSelectAssertions";
 

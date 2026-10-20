@@ -1,4 +1,4 @@
-import {test} from '@playwright/test';
+import {test} from '../shared/browser-preview';
 import {checkView} from '../shared/viewSmoke';
 
 test("Widoki: New catalog promotion Zarządzaj rabatami w katalogu produktów", {tag:'@views'}, async ({page},testInfo) => {

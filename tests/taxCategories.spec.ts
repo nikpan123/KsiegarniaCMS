@@ -1,4 +1,4 @@
-import { test } from "@playwright/test";
+import { test } from "../shared/browser-preview";
 import { TaxCategoriesPage } from "../pages/taxCategories/TaxCategoriesPage";
 import { TaxCategoriesAssertions } from "../assertions/taxCategories/TaxCategoriesAssertions";
 

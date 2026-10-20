@@ -1,4 +1,4 @@
-import {test} from '@playwright/test';
+import {test} from '../shared/browser-preview';
 import {checkView} from '../shared/viewSmoke';
 
 test("Widoki: Nowy kurs wymiany Zarządzaj kursami wymiany walut", {tag:'@views'}, async ({page},testInfo) => {

@@ -1,4 +1,4 @@
-import { test } from "@playwright/test";
+import { test } from "../shared/browser-preview";
 import { LocalesPage } from "../pages/locales/LocalesPage";
 import { LocalesAssertions } from "../assertions/locales/LocalesAssertions";
 

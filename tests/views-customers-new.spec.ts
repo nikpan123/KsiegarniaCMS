@@ -1,4 +1,4 @@
-import {test} from '@playwright/test';
+import {test} from '../shared/browser-preview';
 import {checkView} from '../shared/viewSmoke';
 
 test("Widoki: Nowy Klient Zarządzaj klientami", {tag:'@views'}, async ({page},testInfo) => {

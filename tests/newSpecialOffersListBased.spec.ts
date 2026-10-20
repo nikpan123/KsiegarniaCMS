@@ -1,4 +1,4 @@
-import { test } from "@playwright/test";
+import { test } from "../shared/browser-preview";
 import { NewSpecialOffersListBasedPage } from "../pages/specialOffers/NewSpecialOffersListBasedPage";
 import { NewSpecialOffersListBasedAssertions } from "../assertions/specialOffers/NewSpecialOffersListBasedAssertions";
 

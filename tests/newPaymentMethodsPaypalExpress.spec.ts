@@ -1,4 +1,4 @@
-import { test } from "@playwright/test";
+import { test } from "../shared/browser-preview";
 import { NewPaymentMethodsPaypalExpressPage } from "../pages/paymentMethods/NewPaymentMethodsPaypalExpressPage";
 import { NewPaymentMethodsPaypalExpressAssertions } from "../assertions/paymentMethods/NewPaymentMethodsPaypalExpressAssertions";
 

@@ -247,3 +247,5 @@ html[data-theme=dark] :is(.qa-guide-dialog,.qa-guide-intro){--qa-surface:#172131
 @media(max-width:650px){.qa-guide-dialog{padding:16px}.qa-guide-head{flex-wrap:wrap}.qa-guide-legend{grid-template-columns:1fr;gap:5px}.qa-guide-legend dd{margin-bottom:12px}.qa-guide-intro summary{padding:14px}}
 
 /* QA_GUIDE_END */
+
+#cms-debugger-frame{display:block;width:100%;height:calc(100dvh - 120px);min-height:720px;border:1px solid var(--qa-line,#dce2eb);border-radius:10px}

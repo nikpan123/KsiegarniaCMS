@@ -65,3 +65,11 @@ Logowanie sprawdza opuszczenie formularza przed zapisaniem sesji i zawsze zamyka
 ### Nazwa testu i krok w przeglądarce
 
 Zaznacz w panelu **Pokaż okno przeglądarki**. W prawym górnym rogu strony pojawi się nazwa wykonywanego testu, aktualny etap i czynność. Nakładka działa także po nawigacji i w nowych kartach. Nie przechwytuje kliknięć ani nie pokazuje argumentów akcji, np. wpisywanych haseł. Podgląd bez okna przeglądarki pozostaje wyłączony. Kontrola nakładki na stronach próbnych: `npx playwright test --config playwright.preview.config.ts`.
+
+## Debugger testów
+
+W menu wybierz **Debugger testów**. Pierwsze obsługiwane scenariusze to **Kraje** i **Kanały**. Po automatycznym logowaniu każdy opisany etap czeka na przycisk **Następny krok** lub **F10**: otwarcie listy, rozwinięcie filtrów i sprawdzenie elementów. Te dwa przypadki nie zapisują ani nie usuwają danych CMS.
+
+Podgląd przedstawia rzeczywisty obraz sesji Playwrighta; kliknięcia w obraz nie sterują stroną. Dostępne są kontynuacja automatyczna, pauza przed kolejnym etapem i zatrzymanie. Debugger uruchamia dokładnie jeden obsługiwany scenariusz w Chromium, na jednym workerze i bez ponawiania. W czasie sesji panel blokuje równoległe uruchomienie zwykłych testów.
+
+Po zakończeniu otwórz raport Playwrighta oraz zapis kroków JSON. Ostatni obraz jest też załącznikiem testu. Pozostałe scenariusze nadal działają w katalogu; wymagają dodania opisanych kroków do debuggera. `npm run test:debugger` uruchamia izolowaną próbę interfejsu i sterowania, bez logowania do CMS.

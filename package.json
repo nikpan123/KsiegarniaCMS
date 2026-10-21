@@ -15,7 +15,8 @@
     "test:unit": "node --test dashboard/*.test.mjs",
     "test:views": "node scripts/run-views.mjs",
     "test:views:assets": "node scripts/run-views.mjs --assets",
-    "test:checks": "playwright test --config=playwright.checks.config.ts"
+    "test:checks": "playwright test --config=playwright.checks.config.ts",
+    "test:debugger": "node --test dashboard/debugger.test.mjs dashboard/debugger-browser.check.mjs"
   },
   "keywords": [],
   "author": "",

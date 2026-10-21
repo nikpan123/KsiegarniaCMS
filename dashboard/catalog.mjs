@@ -10,7 +10,7 @@ export async function loadCatalog(root) {
     for (let index = 0; index < matches.length; index++) {
       const match = matches[index];
       const code = file.replace('.spec.ts', '') + (matches.length > 1 ? ':' + (index + 1) : '');
-      rows.push({id:'cms:' + code, code, title:match[1], project:'cms', type:'automatic',
+      rows.push({debuggerMode:['countries.spec.ts','channels.spec.ts'].includes(file)?'ui':null,id:'cms:' + code, code, title:match[1], project:'cms', type:'automatic',
         module:file.startsWith('views-') ? 'Widoki po aktualizacji' : file.startsWith('new') ? 'Formularze tworzenia' : 'Listy i zarządzanie',
         file:'tests/' + file, line:source.slice(0,match.index).split('\n').length,
         tags:file.startsWith('views-') ? ['Sylius','Playwright','smoke','upgrade'] : ['Sylius','Playwright'], source:'Scenariusz Playwright — Księgarnia CMS'});

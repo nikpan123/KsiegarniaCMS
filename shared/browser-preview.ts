@@ -1,3 +1,4 @@
+import {startDebuggerPreview} from './debugger-browser';
 import {test as base, type Page} from '@playwright/test';
 import {readFile} from 'node:fs/promises';
 import path from 'node:path';
@@ -37,7 +38,7 @@ export const test = base.extend<{qaBrowserPreview:boolean|undefined}>({
     const inspector=!!process.env.PWDEBUG&&!['0','false','console'].includes(process.env.PWDEBUG);
     const enabled=!inspector&&(qaBrowserPreview??(process.env.QA_BROWSER_PREVIEW==='1'||(!headless&&process.env.QA_BROWSER_PREVIEW!=='0')));
     const directory=testInfo.config.metadata.qaBrowserPreviewDirectory;
-    if(!enabled||typeof directory!=='string'){await use(page);return;}
+    if(!enabled||typeof directory!=='string'){const stop=await startDebuggerPreview(page,testInfo);try{await use(page);}finally{await stop();}return;}
     const context=page.context();let stopped=false,busy=false;
     const positionFile=typeof testInfo.config.metadata.qaBrowserPreviewPositionFile==='string'?testInfo.config.metadata.qaBrowserPreviewPositionFile:undefined;
     let positionStore=positionStores.get(context);

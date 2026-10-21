@@ -1,3 +1,4 @@
+import {DebugHub} from "./debugger/hub.mjs";
 import http from 'node:http';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -45,6 +46,7 @@ export async function createDashboard({projectRoot=root, dataDir=path.join(proje
     const missing=['BASE_URL','USER_NAME','PASSWORD'].filter(key=>!environment[key]?.trim());
     if(missing.length)throw fail('Uzupełnij lokalny plik .env: '+missing.join(', '));
     try{const url=new URL(environment.BASE_URL);if(!['https:','http:'].includes(url.protocol)||url.username||url.password)throw new Error();}catch{throw fail('BASE_URL musi być adresem HTTP lub HTTPS bez danych logowania.');}
+    if(body.debugger&&(body.testIds.length!==1||!catalog.find(t=>t.id===body.testIds[0])?.debuggerMode))throw fail('Wybierz jeden test z opisanymi krokami.');
     const chosen=catalog.filter(t=>body.testIds.includes(t.id));
     // Selection is by file; do not silently execute unselected cases after catalog changes.
     const files=[...new Set(chosen.map(t=>t.file))];
@@ -55,14 +57,18 @@ export async function createDashboard({projectRoot=root, dataDir=path.join(proje
       active={id,title:chosen.length===catalog.length?'Pełny zestaw CMS':chosen.length===1?chosen[0].title:`Wybrane scenariusze (${chosen.length})`,
         project:'cms',startedAt:new Date().toISOString(),status:'RUNNING',browser:body.browser,headed:body.headed,strictAssets:!!body.strictAssets,
         environment:new URL(environment.BASE_URL).host,testIds:chosen.map(t=>t.id),total:chosen.length,results:[],logs:[],counts:{passed:0,failed:0,skipped:0}};
-      const run=active;history.unshift(run);await persist();
+      const run=active;
+      const debugSession=body.debugger?debugHub.create({id,title:chosen[0].title,mode:'ui',environment:new URL(environment.BASE_URL).host}):null;
+      if(debugSession)run.debugger=true;
+      history.unshift(run);await persist();
       const args=[path.join(projectRoot,'node_modules/@playwright/test/cli.js'),'test',...files,'--project='+body.browser,'--workers='+(chosen.every(t=>t.tags.includes('upgrade'))?'2':'1'),
         '--output='+path.join(dataDir,'artifacts',id),'--reporter=list,html,json,./dashboard/reporter.cjs,./shared/browser-preview-reporter.cjs'];
       if(body.headed)args.push('--headed');
-      child=spawn(process.execPath,args,{cwd:projectRoot,windowsHide:true,env:{...environment,VIEW_STRICT_ASSETS:body.strictAssets?'1':'0',FORCE_COLOR:'0',PLAYWRIGHT_HTML_OPEN:'never',
+      if(debugSession){const workerArg=args.findIndex(a=>a.startsWith('--workers='));args[workerArg]='--workers=1';args.push('--timeout=0','--retries=0','--trace=on');}
+      child=spawn(process.execPath,args,{cwd:projectRoot,windowsHide:true,env:{...environment,QA_DEBUGGER:debugSession?'1':'0',...(debugSession?{QA_BROWSER_PREVIEW:'0',QA_DEBUG_URL:'http://127.0.0.1:'+server.address().port,QA_DEBUG_RUN:id,QA_DEBUG_KEY:debugSession.key}:{}),VIEW_STRICT_ASSETS:body.strictAssets?'1':'0',FORCE_COLOR:'0',PLAYWRIGHT_HTML_OPEN:'never',
         PLAYWRIGHT_HTML_OUTPUT_DIR:reportDir,PLAYWRIGHT_JSON_OUTPUT_FILE:path.join(reportDir,'results.json')},stdio:['ignore','pipe','pipe']});
       let pending='',finished=false;
-      const log=line=>{if(line.trim())run.logs.push(sanitize(line).slice(0,4000));if(run.logs.length>1200)run.logs.shift();};
+      const log=line=>{debugSession?.log(sanitize(line));if(line.trim())run.logs.push(sanitize(line).slice(0,4000));if(run.logs.length>1200)run.logs.shift();};
       const consume=line=>{
         if(line.startsWith('CMS_EVENT:')){
           try{const event=JSON.parse(line.slice(10));if(event.type==='begin')run.total=event.total;
@@ -81,20 +87,24 @@ export async function createDashboard({projectRoot=root, dataDir=path.join(proje
       child.stderr.on('data',buffer=>buffer.toString().split(/\r?\n/).forEach(log));
       const finish=async(code,error)=>{
         if(finished)return;finished=true;if(pending)consume(pending);if(error)log(error.message);
-        run.status=code===0&&run.runnerStatus==='passed'?'PASSED':'FAILED';run.finishedAt=new Date().toISOString();run.exitCode=code;
-        run.report='/report/'+id+'/';active=null;child=null;
+        run.status=debugSession?.stopRequested?'STOPPED':code===0&&run.runnerStatus==='passed'?'PASSED':'FAILED';run.finishedAt=new Date().toISOString();run.exitCode=code;
+        run.report='/report/'+id+'/';
+        if(debugSession){await debugHub.finish(id,run.status,{directory:reportDir,report:run.report,stepsFile:run.report+'debugger-steps.json'}).catch(error=>log('Zapis kroków debuggera: '+error.message));run.debuggerStepsFile=run.report+'debugger-steps.json';}
+        active=null;child=null;
         try{await persist();}catch(e){console.error('Nie zapisano historii:',e.message);}finally{await unlink(lockFile).catch(()=>{});}
       };
       child.on('error',error=>void finish(null,error));child.on('close',code=>void finish(code));
       return run;
     }catch(e){active=null;child=null;await unlink(lockFile).catch(()=>{});throw e;}
   }
+  const debugHub=new DebugHub({project:'Księgarnia CMS',environment:()=>{try{return new URL(environment.BASE_URL).host;}catch{return 'Uzupełnij konfigurację CMS';}},catalog:async()=>(await loadCatalog(projectRoot)).filter(t=>t.debuggerMode).map(t=>({...t,mode:'ui',description:'Otwiera listę, rozwija filtry i sprawdza tabelę oraz przyciski. Nie tworzy ani nie usuwa rekordów CMS. Logowanie wykonuje się automatycznie.'})),start:selected=>launch({testIds:[selected.id],browser:'chromium',headed:false,debugger:true}),stop:async()=>{if(child){if(process.platform==='win32')spawn('taskkill',['/pid',String(child.pid),'/T','/F'],{windowsHide:true});else child.kill('SIGTERM');}}});
   const server=http.createServer(async(req,res)=>{
     const address=server.address(),origin='http://127.0.0.1:'+address.port;
     const json=(status,data)=>{res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(JSON.stringify(data));};
     try{
       if(req.headers.host!==new URL(origin).host)throw fail('Panel jest dostępny wyłącznie lokalnie.',403);
       const url=new URL(req.url,origin);
+      if(await debugHub.handle(req,res,url))return;
       if(req.method==='POST'){
         if(req.headers.origin!==origin||req.headers['x-cms-token']!==token||!req.headers['content-type']?.includes('application/json'))throw fail('Odśwież panel przed uruchomieniem testów.',403);
         let text='';for await(const chunk of req){text+=chunk;if(text.length>64000)throw fail('Zbyt duże żądanie.',413);}

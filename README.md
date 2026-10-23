@@ -73,3 +73,6 @@ W menu wybierz **Debugger testów**. Pierwsze obsługiwane scenariusze to **Kraj
 Podgląd przedstawia rzeczywisty obraz sesji Playwrighta; kliknięcia w obraz nie sterują stroną. Dostępne są kontynuacja automatyczna, pauza przed kolejnym etapem i zatrzymanie. Debugger uruchamia dokładnie jeden obsługiwany scenariusz w Chromium, na jednym workerze i bez ponawiania. W czasie sesji panel blokuje równoległe uruchomienie zwykłych testów.
 
 Po zakończeniu otwórz raport Playwrighta oraz zapis kroków JSON. Ostatni obraz jest też załącznikiem testu. Pozostałe scenariusze nadal działają w katalogu; wymagają dodania opisanych kroków do debuggera. `npm run test:debugger` uruchamia izolowaną próbę interfejsu i sterowania, bez logowania do CMS.
+
+### Edycja scenariuszy
+Przy scenariuszu wybierz „Edytuj scenariusz” lub „Opis / edycja”. Możesz zmienić tytuł, opis, warunki wstępne, dane, kroki i oczekiwany wynik. Kroki można dodawać, usuwać i przestawiać. „Zapisz scenariusz” zapisuje opis lokalnie; „Anuluj” pozostawia dotychczasowy. Formularz zachowuje wpisany tekst, gdy ktoś zapisze inną wersję w drugiej karcie. Edycja dotyczy instrukcji w danym panelu, nie kodu automatu ani jego ID. Poprzednia wersja i wcześniejsze dowody pozostają zachowane. Zmieniona instrukcja wymaga nowego sprawdzenia.

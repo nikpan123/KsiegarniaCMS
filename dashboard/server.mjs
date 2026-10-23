@@ -1,3 +1,4 @@
+import {createScenarioEditor} from './scenario-editor.mjs';
 import {DebugHub} from "./debugger/hub.mjs";
 import http from 'node:http';
 import path from 'node:path';
@@ -21,6 +22,12 @@ export async function createDashboard({projectRoot=root, dataDir=path.join(proje
   const secrets=Object.entries(environment).filter(([key,v])=>/password|token|secret|api_key/i.test(key)&&v?.length>=4).map(([,v])=>v);
   const sanitize=value=>{let result=String(value).replace(/\x1b\[[0-?]*[ -/]*[@-~]/g,'');for(const secret of secrets)result=result.split(secret).join('[ukryto]');return result;};
   const token=randomBytes(24).toString('hex');
+  const scenarioEditor=createScenarioEditor({file:path.join(dataDir,'scenario-overrides.json'),backupDir:path.join(dataDir,'scenario-revisions'),baseCatalog:async()=>{
+    let guide={};try{const source=await readFile(path.join(projectRoot,'dashboard/public/app.js'),'utf8');const match=source.match(/const qaGuideData_cms=(\{.*\});/);if(match)guide=JSON.parse(match[1]);}catch{/* Optional descriptive guide. */}
+    return {features:[{id:'cms',scenarios:(await loadCatalog(projectRoot)).map(t=>{const g=guide[t.id]||{};return {id:t.id,title:t.title,description:g.purpose||'',preconditions:g.prepare||['Dostęp do właściwego środowiska CMS i konto z wymaganymi uprawnieniami.'],steps:g.steps?.length?g.steps:['Wykonaj czynności opisane w teście '+t.code+'.'],expected:Array.isArray(g.expected)?g.expected.join('\n'):g.expected||'Kontrole opisane w skrypcie testowym są spełnione.',blocker:g.scope||'',data:'',testIds:[t.id]};})}]};
+  }});
+  async function editedCatalog(){const docs=(await scenarioEditor.catalog()).features[0].scenarios;return (await loadCatalog(projectRoot)).map(t=>{const doc=docs.find(d=>d.id===t.id);return {...t,title:doc.title,scenarioDoc:doc};});}
+
   let history=await readJson(historyFile,[]), active=null, child=null;
   // A previous abrupt shutdown must not leave a run labelled as still running.
   const existingLock=await readJson(lockFile,null);
@@ -74,7 +81,7 @@ export async function createDashboard({projectRoot=root, dataDir=path.join(proje
           try{const event=JSON.parse(line.slice(10));if(event.type==='begin')run.total=event.total;
             if(event.type==='end')run.runnerStatus=event.status;
             if(event.type==='test'){
-              const result={...event};delete result.type;result.title=sanitize(result.title);result.warnings=Array.isArray(result.warnings)?result.warnings.map(w=>({type:w.type,description:sanitize(w.description)})):[];
+              const result={...event};delete result.type;result.title=sanitize(result.title);result.dataErrors=Array.isArray(result.dataErrors)?result.dataErrors.map(d=>Object.fromEntries(Object.entries(d).map(([k,v])=>[k,sanitize(v)]))):[];result.warnings=Array.isArray(result.warnings)?result.warnings.map(w=>({type:w.type,description:sanitize(w.description)})):[];
               const old=run.results.findIndex(r=>r.file===result.file&&r.title===result.title);
               if(old>=0)run.results.splice(old,1,result);else run.results.push(result);
               run.counts={passed:run.results.filter(r=>r.status==='passed').length,failed:run.results.filter(r=>['failed','timedOut','interrupted'].includes(r.status)).length,skipped:run.results.filter(r=>r.status==='skipped').length};
@@ -109,13 +116,15 @@ export async function createDashboard({projectRoot=root, dataDir=path.join(proje
         if(req.headers.origin!==origin||req.headers['x-cms-token']!==token||!req.headers['content-type']?.includes('application/json'))throw fail('Odśwież panel przed uruchomieniem testów.',403);
         let text='';for await(const chunk of req){text+=chunk;if(text.length>64000)throw fail('Zbyt duże żądanie.',413);}
         let body;try{body=JSON.parse(text);}catch{throw fail('Niepoprawny JSON.');}
+        if(url.pathname==='/api/scenarios/update')return json(200,await scenarioEditor.update(body,{origin:req.headers.origin,expectedOrigin:origin,contentType:req.headers['content-type'],editToken:req.headers['x-scenario-token']}));
         if(url.pathname==='/api/run')return json(202,await launch(body));
         throw fail('Nie znaleziono.',404);
       }
       if(req.method!=='GET')throw fail('Niedozwolona metoda.',405);
+      if(url.pathname==='/api/scenarios')return json(200,await scenarioEditor.catalog());
       if(url.pathname==='/api/state'){
         let target='';try{target=new URL(environment.BASE_URL).host;}catch{}
-        return json(200,{catalog:await loadCatalog(projectRoot),history,active:active?.id||null,browsers,
+        return json(200,{catalog:await editedCatalog(),history,active:active?.id||null,browsers,
           configuration:{target,missing:['BASE_URL','USER_NAME','PASSWORD'].filter(key=>!environment[key]?.trim())}});
       }
       if(url.pathname.startsWith('/report/')){
@@ -126,7 +135,7 @@ export async function createDashboard({projectRoot=root, dataDir=path.join(proje
         const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript','.css':'text/css','.json':'application/json','.png':'image/png','.zip':'application/zip','.webm':'video/webm'}[path.extname(file)]||'application/octet-stream';
         const data=await readFile(file);res.writeHead(200,{'Content-Type':mime,'X-Content-Type-Options':'nosniff','Cache-Control':'no-store'});return res.end(data);
       }
-      const asset={'/':'index.html','/app.js':'app.js','/style.css':'style.css'}[url.pathname];if(!asset)throw fail('Nie znaleziono.',404);
+      const asset={'/':'index.html','/app.js':'app.js','/style.css':'style.css','/scenario-editor.js':'scenario-editor.js','/scenario-editor.css':'scenario-editor.css'}[url.pathname];if(!asset)throw fail('Nie znaleziono.',404);
       let data=await readFile(path.join(root,'dashboard/public',asset),'utf8');if(asset==='index.html')data=data.replace('__TOKEN__',token);
       res.writeHead(200,{'Content-Type':asset.endsWith('.css')?'text/css':asset.endsWith('.js')?'text/javascript; charset=utf-8':'text/html; charset=utf-8',
         'Cache-Control':'no-store','Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; frame-ancestors http://127.0.0.1:4180; object-src 'none'; base-uri 'none'"});res.end(data);
